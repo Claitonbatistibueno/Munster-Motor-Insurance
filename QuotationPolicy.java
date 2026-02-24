@@ -1,5 +1,6 @@
 public class QuotationPolicy {
-    // Attributes linking to Customer and Vehicle
+    // Attributes linking to Customer, Vehicle, and the Quote itself
+    public int quoteID;
     public int customerID;
     public int vehicleID;
     public double finalQuote;
@@ -7,6 +8,7 @@ public class QuotationPolicy {
 
     // Constructor
     public QuotationPolicy(int customerID, int vehicleID, String gender, int age, String county, String make, String model, String emissions, String category) {
+        this.quoteID = (int) (Math.random() * 90000) + 10000; // Generates a 5-digit Quote ID
         this.customerID = customerID;
         this.vehicleID = vehicleID;
         this.finalQuote = 0.0;
@@ -93,9 +95,9 @@ public class QuotationPolicy {
     // Output Method
     public String DisplayDetails() {
         if (this.isDeclined) {
-            return "Customer ID: " + this.customerID + "\nVehicle ID: " + this.vehicleID + "\nStatus: DECLINED (Age >= 80. No Quote Provided.)";
+            return "Quote ID: #" + this.quoteID + "\nCustomer ID: " + this.customerID + "\nVehicle ID: " + this.vehicleID + "\nStatus: DECLINED (Age >= 80. No Quote Provided.)";
         } else {
-            return "Customer ID: " + this.customerID + "\nVehicle ID: " + this.vehicleID + "\nStatus: APPROVED\nFinal Quote: €" + this.finalQuote;
+            return "Quote ID: #" + this.quoteID + "\nCustomer ID: " + this.customerID + "\nVehicle ID: " + this.vehicleID + "\nStatus: APPROVED\nFinal Quote: €" + this.finalQuote;
         }
     }
 }
