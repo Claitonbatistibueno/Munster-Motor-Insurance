@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class Main {
     public static void main(String[] args) {
@@ -14,7 +16,7 @@ public class Main {
         // ==========================================
         ArrayList<Customer> customerDirectory = new ArrayList<>();
         ArrayList<Vehicle> vehicleDirectory = new ArrayList<>();
-        ArrayList<QuotationPolicy> quoteDirectory = new ArrayList<>(); // Nova lista para guardar as cotações geradas
+        ArrayList<QuotationPolicy> quoteDirectory = new ArrayList<>();
 
         while (programRunning) {
             // Main Menu
@@ -82,7 +84,7 @@ public class Main {
                             System.out.println("[i] Notice: File already exists. Overwriting data.");
                         }
                         FileWriter myWriter= new FileWriter(CustomerFirstName+"_"+CustomerSurname+".txt");
-                        myWriter.write(newCustomer.DisplayDetails()); // Using the class method to save the details
+                        myWriter.write(newCustomer.DisplayDetails());
                         myWriter.close();
                     } catch (IOException e) {
                         System.out.println("[X] An error occurred saving the file.");
@@ -171,7 +173,7 @@ public class Main {
             }
 
             // ==========================================
-            // 3. QUOTATION CALCULATOR (SMART OOP APPROACH)
+            // 3. QUOTATION CALCULATOR
             // ==========================================
             else if(userInput.equals("3")){
                 System.out.println("\n>>> LINK NEW QUOTATION <<<");
@@ -220,7 +222,7 @@ public class Main {
                     try {
                         // Takes the last 4 characters of DOB (e.g., 1990 from "01/01/1990")
                         int birthYear = Integer.parseInt(selectedCustomer.DOB.substring(selectedCustomer.DOB.length() - 4));
-                        qAge = 2026 - birthYear; // Calculates age based on current system year (2026)
+                        qAge = 2026 - birthYear; // Calculates age based on current system year
                     } catch (Exception e) {
                         System.out.print("[!] Could not auto-calculate age from DOB. Enter Age manually: ");
                         qAge = Integer.parseInt(myScanner.nextLine());
@@ -308,20 +310,18 @@ public class Main {
                     if (catChoice.equals("1")) qCategory = "Fully Comprehensive Plus";
                     else if (catChoice.equals("2")) qCategory = "Third Party Fire and Theft";
 
-                    // THE GRAND OOP MOMENT: Creating the quotation object
+                    // Creating the quotation object
                     QuotationPolicy newQuote = new QuotationPolicy(cID, vID, qGender, qAge, qCounty, qMake, qModel, qEmissions, qCategory);
-
-                    // Adicionando a nova cotação à memória para uso no Reports Menu!
                     quoteDirectory.add(newQuote);
 
                     System.out.println("\n==========================================");
                     System.out.println(newQuote.DisplayDetails());
                     System.out.println("==========================================");
 
-                    // Saving the quote using the new Quote ID as the filename!
+                    // Saving the quote
                     if (!newQuote.isDeclined) {
                         try {
-                            FileWriter quoteWriter = new FileWriter("Quote_Number_" + newQuote.quoteID + ".txt");
+                            FileWriter quoteWriter = new FileWriter("Quote_" + newQuote.quoteID + ".txt");
                             quoteWriter.write(newQuote.DisplayDetails());
                             quoteWriter.close();
                             System.out.println("[!] Quote saved to disk successfully.");
@@ -340,7 +340,7 @@ public class Main {
             else if(userInput.equals("4")){
                 System.out.println("\n--- REPORTS MENU ---");
                 System.out.println("1. Historical Incident Reports");
-                System.out.println("2. Comprehensive Quotation Reports (NEW ✨)");
+                System.out.println("2. Generate Certificates of Motor Insurance (NEW ✨)");
                 System.out.print("Select an option: ");
                 String repInput = myScanner.nextLine();
 
@@ -353,50 +353,82 @@ public class Main {
                     System.out.println("======================================");
                 }
                 else if (repInput.equals("2")) {
-                    System.out.println("\n>>> DYNAMIC QUOTATION REPORTS <<<");
+                    System.out.println("\n>>> CERTIFICATES OF MOTOR INSURANCE <<<");
                     if (quoteDirectory.isEmpty()) {
                         System.out.println("[i] No quotations have been generated in this session yet.");
                     } else {
-                        // Iterando pela lista de cotações para montar o relatório dinâmico
+                        // Setting up dynamic dates (Today and 1 year in the future)
+                        LocalDate today = LocalDate.now();
+                        LocalDate nextYear = today.plusYears(1);
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        String effectiveDate = today.format(formatter);
+                        String expiryDate = nextYear.format(formatter);
+
+                        // Iterating through the generated quotes to build the official certificates
                         for (QuotationPolicy q : quoteDirectory) {
 
-                            // 1. Busca o Cliente correspondente (JOIN)
+                            // Skips declined quotes (no certificate should be issued)
+                            if (q.isDeclined) continue;
+
+                            // 1. Find matching Customer
                             Customer matchedCustomer = null;
                             for (Customer c : customerDirectory) {
                                 if (c.CustomerID == q.customerID) { matchedCustomer = c; break; }
                             }
 
-                            // 2. Busca o Veículo correspondente (JOIN)
+                            // 2. Find matching Vehicle
                             Vehicle matchedVehicle = null;
                             for (Vehicle v : vehicleDirectory) {
                                 if (v.VehicleID == q.vehicleID) { matchedVehicle = v; break; }
                             }
 
-                            // 3. Montagem Visual do Ticket
+                            // 3. Visual Assembly of the Certificate (Matching the physical document)
                             if (matchedCustomer != null && matchedVehicle != null) {
-                                System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
-                                System.out.println("║                 MUNSTER MOTOR INSURANCE                        ║");
-                                System.out.println("║                OFFICIAL QUOTATION SUMMARY                      ║");
-                                System.out.println("╠════════════════════════════════════════════════════════════════╣");
-                                System.out.printf("║  QUOTE ID : %-19s STATUS: %-16s ║\n", q.quoteID, (q.isDeclined ? "DECLINED" : "APPROVED"));
-                                System.out.println("║----------------------------------------------------------------║");
-                                System.out.println("║  CUSTOMER DETAILS                                              ║");
-                                System.out.printf("║  Name     : %-19s Phone : %-16s ║\n", matchedCustomer.FirstName + " " + matchedCustomer.Surname, matchedCustomer.PhoneNumber);
-                                System.out.printf("║  City     : %-19s Email : %-16s ║\n", matchedCustomer.City, matchedCustomer.Email);
-                                System.out.println("║----------------------------------------------------------------║");
-                                System.out.println("║  VEHICLE DETAILS                                               ║");
-                                System.out.printf("║  Vehicle  : %-19s Color : %-16s ║\n", matchedVehicle.Make + " " + matchedVehicle.Model, matchedVehicle.Colour);
-                                System.out.printf("║  Year     : %-19d V. ID : %-16d ║\n", matchedVehicle.Year, matchedVehicle.VehicleID);
-                                System.out.println("║----------------------------------------------------------------║");
+                                String certificate =
+                                        "\nCertificate of Motor Insurance\n\n" +
+                                                "Munster Motor Insurance\n\n" +
+                                                "1. Certificate Number [" + q.quoteID + "]\n\n" +
+                                                "2. Description of Vehicle [" + matchedVehicle.Make + "] - [" + matchedVehicle.Model + "] - [" + matchedVehicle.Year + "]\n\n" +
+                                                "3. Name of Policyholder [" + matchedCustomer.FirstName + " " + matchedCustomer.Surname + "]\n\n" +
+                                                "4. Effective date of the commencement of insurance [" + effectiveDate + " at 00:00:01]\n\n" +
+                                                "5. Date of expiry of insurance [Midnight " + expiryDate + "]\n\n" +
+                                                "6. Person or classes of person entitled to drive as defined below\n" +
+                                                "D - Any person who is driving with the policyholder's consent.\n\n" +
+                                                "Provided that the person driving holds a licence to drive the vehicle or has held and is not disqualified\n" +
+                                                "from holding or obtaining such a licence.\n\n" +
+                                                "7. Limitations as to use as defined below\n" +
+                                                "Use in connection with the policyholder's business excluding use for hire and/or reward.\n" +
+                                                "Use for social, domestic and pleasure purposes only.\n\n" +
+                                                "8. The policy does not cover\n\n" +
+                                                "    • Carriage of passengers for hire and/or reward\n" +
+                                                "    • Racing, pace-setting, speed trials, motor rallies, competitions or trials\n" +
+                                                "    • Use in connection with the Motor Trade\n" +
+                                                "    • Towing for reward a mechanically propelled vehicle\n" +
+                                                "    • Semi-trailer being part of an articulated vehicle\n\n" +
+                                                "--------------------------------------------------------------------------------------------------------\n" +
+                                                "I hereby certify that the document to which this certificate relates satisfies the requirements of the relevant law applicable in\n" +
+                                                "Great Britain, Northern Ireland, the Isle of Man, the Island of Guernsey, the Island of Jersey and the Island of Alderney.\n" +
+                                                "--------------------------------------------------------------------------------------------------------\n\n" +
+                                                "Munster Motor Insurance\n" +
+                                                "Thomond Park House\n" +
+                                                "Limerick\n\n" +
+                                                "Signed:\n" +
+                                                "B. D. Carpenters\n" +
+                                                "*Underwriter\n" +
+                                                "========================================================================================================\n";
 
-                                if (q.isDeclined) {
-                                    System.out.println("║  PREMIUM BREAKDOWN                                             ║");
-                                    System.out.println("║  Final Premium: N/A (Declined due to strict risk factors)      ║");
-                                } else {
-                                    System.out.println("║  PREMIUM BREAKDOWN                                             ║");
-                                    System.out.printf("║  Final Premium: € %-44.2f ║\n", q.finalQuote);
+                                // Print to console
+                                System.out.println(certificate);
+
+                                // Save automatically to a clean .txt file for future printing/conversion
+                                try {
+                                    FileWriter certWriter = new FileWriter("Certificate_" + q.quoteID + ".txt");
+                                    certWriter.write(certificate);
+                                    certWriter.close();
+                                    System.out.println("[!] Official Certificate saved as 'Certificate_" + q.quoteID + ".txt'");
+                                } catch (IOException e) {
+                                    System.out.println("[X] Failed to save certificate file.");
                                 }
-                                System.out.println("╚════════════════════════════════════════════════════════════════╝");
                             }
                         }
                     }
@@ -411,7 +443,7 @@ public class Main {
             else if(userInput.equals("0")){
                 System.out.println("\nSaving data and shutting down system...");
                 System.out.println("Goodbye!");
-                programRunning = false; // Breaks the loop to exit the program
+                programRunning = false;
             }
 
             // ERROR HANDLING
