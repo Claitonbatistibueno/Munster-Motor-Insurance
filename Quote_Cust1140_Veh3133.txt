@@ -1,0 +1,4 @@
+Customer ID: 1140
+Vehicle ID: 3133
+Status: APPROVED
+Final Quote: €1800.0
