@@ -1,6 +1,8 @@
+import java.util.UUID;
+
 public class QuotationPolicy {
-    // Attributes linking to Customer, Vehicle, and the Quote itself
-    public int quoteID;
+    // INformation
+    public String quoteID; // Alterado para String para suportar UUID
     public int customerID;
     public int vehicleID;
     public double finalQuote;
@@ -8,29 +10,29 @@ public class QuotationPolicy {
 
     // Constructor
     public QuotationPolicy(int customerID, int vehicleID, String gender, int age, String county, String make, String model, String emissions, String category) {
-        this.quoteID = (int) (Math.random() * 90000) + 10000; // Generates a 5-digit Quote ID
+        // Geração de ID Único e Profissional (Ex: Q-A1B2C3D4)
+        this.quoteID = "Q-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+
         this.customerID = customerID;
         this.vehicleID = vehicleID;
         this.finalQuote = 0.0;
         this.isDeclined = false;
 
-        // Triggers the mathematical logic upon object creation
+        // Calcule
         calculateQuote(gender, age, county, make, model, emissions, category);
     }
 
-    // Business Logic Method (OOP)
+    // Lógica de Negócios (Regras de Cálculo mantidas)
     private void calculateQuote(String gender, int age, String county, String make, String model, String emissions, String category) {
-        // 1. Base Quote & Gender
         if (gender.equalsIgnoreCase("M")) {
             this.finalQuote += 2000.0;
         } else if (gender.equalsIgnoreCase("F")) {
             this.finalQuote += 800.0;
         }
 
-        // 2. Age Rule (>= 80 declines the quote)
         if (age >= 80) {
             this.isDeclined = true;
-            return; // Stops calculation
+            return;
         }
 
         if (gender.equalsIgnoreCase("M")) {
@@ -43,7 +45,6 @@ public class QuotationPolicy {
             else if (age < 80) this.finalQuote -= 520;
         }
 
-        // 3. County Modifier
         switch (county) {
             case "Cork": this.finalQuote += 50; break;
             case "Clare": this.finalQuote += 225; break;
@@ -53,7 +54,6 @@ public class QuotationPolicy {
             case "Waterford": this.finalQuote -= 100; break;
         }
 
-        // 4. Make & Model Modifier
         if (make.equalsIgnoreCase("BMW")) {
             switch (model) {
                 case "Convertible": this.finalQuote += 200; break;
@@ -82,22 +82,19 @@ public class QuotationPolicy {
             }
         }
 
-        // 5. Emissions Modifier
         if (emissions.equalsIgnoreCase("High")) this.finalQuote += 300;
         else if (emissions.equalsIgnoreCase("Medium")) this.finalQuote += 150;
         else if (emissions.equalsIgnoreCase("Low")) this.finalQuote -= 55;
 
-        // 6. Insurance Category Modifier
         if (category.equalsIgnoreCase("Fully Comprehensive Plus")) this.finalQuote += 200;
         else if (category.equalsIgnoreCase("Third Party Fire and Theft")) this.finalQuote -= 120;
     }
 
-    // Output Method
     public String DisplayDetails() {
         if (this.isDeclined) {
-            return "Quote ID: #" + this.quoteID + "\nCustomer ID: " + this.customerID + "\nVehicle ID: " + this.vehicleID + "\nStatus: DECLINED (Age >= 80. No Quote Provided.)";
+            return "Quote ID: " + this.quoteID + "\nCustomer ID: " + this.customerID + "\nVehicle ID: " + this.vehicleID + "\nStatus: DECLINED (Age >= 80. No Quote Provided.)";
         } else {
-            return "Quote ID: #" + this.quoteID + "\nCustomer ID: " + this.customerID + "\nVehicle ID: " + this.vehicleID + "\nStatus: APPROVED\nFinal Quote: €" + this.finalQuote;
+            return "Quote ID: " + this.quoteID + "\nCustomer ID: " + this.customerID + "\nVehicle ID: " + this.vehicleID + "\nStatus: APPROVED\nFinal Quote: €" + this.finalQuote;
         }
     }
 }

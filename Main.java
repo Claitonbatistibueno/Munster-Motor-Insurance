@@ -2,7 +2,7 @@ import java.util.Scanner;
 import java.io.File;
 import java.io.IOException;
 import java.io.FileWriter;
-import java.util.ArrayList; // Required for creating in-memory lists
+import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) {
@@ -14,6 +14,7 @@ public class Main {
         // ==========================================
         ArrayList<Customer> customerDirectory = new ArrayList<>();
         ArrayList<Vehicle> vehicleDirectory = new ArrayList<>();
+        ArrayList<QuotationPolicy> quoteDirectory = new ArrayList<>(); // Nova lista para guardar as cotações geradas
 
         while (programRunning) {
             // Main Menu
@@ -310,6 +311,9 @@ public class Main {
                     // THE GRAND OOP MOMENT: Creating the quotation object
                     QuotationPolicy newQuote = new QuotationPolicy(cID, vID, qGender, qAge, qCounty, qMake, qModel, qEmissions, qCategory);
 
+                    // Adicionando a nova cotação à memória para uso no Reports Menu!
+                    quoteDirectory.add(newQuote);
+
                     System.out.println("\n==========================================");
                     System.out.println(newQuote.DisplayDetails());
                     System.out.println("==========================================");
@@ -334,12 +338,71 @@ public class Main {
             // 4. REPORTS MENU
             // ==========================================
             else if(userInput.equals("4")){
-                System.out.println("\n>>> INCIDENT REPORTS <<<");
-                System.out.println("======================================");
-                System.out.println("REPORT #001");
-                Reports report1 = new Reports("Mary O'Shea","12/01/2026","15:15","Ennis Rd, Limerick","My car, a 2008 red Nissan Micra, collided with a 2010 blue Renault Zoe near the Jetland Shopping Centre on Ennis Road, Limerick. No injuries were sustained.","Minor damage to right wing-mirror and right headlight.","13/02/2026.");
-                System.out.println(report1.DisplayDetails());
-                System.out.println("======================================");
+                System.out.println("\n--- REPORTS MENU ---");
+                System.out.println("1. Historical Incident Reports");
+                System.out.println("2. Comprehensive Quotation Reports (NEW ✨)");
+                System.out.print("Select an option: ");
+                String repInput = myScanner.nextLine();
+
+                if (repInput.equals("1")) {
+                    System.out.println("\n>>> INCIDENT REPORTS <<<");
+                    System.out.println("======================================");
+                    System.out.println("REPORT #001");
+                    Reports report1 = new Reports("Mary O'Shea","12/01/2026","15:15","Ennis Rd, Limerick","My car, a 2008 red Nissan Micra, collided with a 2010 blue Renault Zoe near the Jetland Shopping Centre on Ennis Road, Limerick. No injuries were sustained.","Minor damage to right wing-mirror and right headlight.","13/02/2026.");
+                    System.out.println(report1.DisplayDetails());
+                    System.out.println("======================================");
+                }
+                else if (repInput.equals("2")) {
+                    System.out.println("\n>>> DYNAMIC QUOTATION REPORTS <<<");
+                    if (quoteDirectory.isEmpty()) {
+                        System.out.println("[i] No quotations have been generated in this session yet.");
+                    } else {
+                        // Iterando pela lista de cotações para montar o relatório dinâmico
+                        for (QuotationPolicy q : quoteDirectory) {
+
+                            // 1. Busca o Cliente correspondente (JOIN)
+                            Customer matchedCustomer = null;
+                            for (Customer c : customerDirectory) {
+                                if (c.CustomerID == q.customerID) { matchedCustomer = c; break; }
+                            }
+
+                            // 2. Busca o Veículo correspondente (JOIN)
+                            Vehicle matchedVehicle = null;
+                            for (Vehicle v : vehicleDirectory) {
+                                if (v.VehicleID == q.vehicleID) { matchedVehicle = v; break; }
+                            }
+
+                            // 3. Montagem Visual do Ticket
+                            if (matchedCustomer != null && matchedVehicle != null) {
+                                System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
+                                System.out.println("║                 MUNSTER MOTOR INSURANCE                        ║");
+                                System.out.println("║                OFFICIAL QUOTATION SUMMARY                      ║");
+                                System.out.println("╠════════════════════════════════════════════════════════════════╣");
+                                System.out.printf("║  QUOTE ID : %-19s STATUS: %-16s ║\n", q.quoteID, (q.isDeclined ? "DECLINED" : "APPROVED"));
+                                System.out.println("║----------------------------------------------------------------║");
+                                System.out.println("║  CUSTOMER DETAILS                                              ║");
+                                System.out.printf("║  Name     : %-19s Phone : %-16s ║\n", matchedCustomer.FirstName + " " + matchedCustomer.Surname, matchedCustomer.PhoneNumber);
+                                System.out.printf("║  City     : %-19s Email : %-16s ║\n", matchedCustomer.City, matchedCustomer.Email);
+                                System.out.println("║----------------------------------------------------------------║");
+                                System.out.println("║  VEHICLE DETAILS                                               ║");
+                                System.out.printf("║  Vehicle  : %-19s Color : %-16s ║\n", matchedVehicle.Make + " " + matchedVehicle.Model, matchedVehicle.Colour);
+                                System.out.printf("║  Year     : %-19d V. ID : %-16d ║\n", matchedVehicle.Year, matchedVehicle.VehicleID);
+                                System.out.println("║----------------------------------------------------------------║");
+
+                                if (q.isDeclined) {
+                                    System.out.println("║  PREMIUM BREAKDOWN                                             ║");
+                                    System.out.println("║  Final Premium: N/A (Declined due to strict risk factors)      ║");
+                                } else {
+                                    System.out.println("║  PREMIUM BREAKDOWN                                             ║");
+                                    System.out.printf("║  Final Premium: € %-44.2f ║\n", q.finalQuote);
+                                }
+                                System.out.println("╚════════════════════════════════════════════════════════════════╝");
+                            }
+                        }
+                    }
+                } else {
+                    System.out.println("\n[X] Invalid option. Returning to menu.");
+                }
             }
 
             // ==========================================
@@ -366,4 +429,3 @@ public class Main {
         myScanner.close();
     }
 }
-
