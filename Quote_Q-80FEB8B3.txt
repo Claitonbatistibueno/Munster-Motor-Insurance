@@ -1,0 +1,5 @@
+Quote ID: Q-80FEB8B3
+Customer ID: 2640
+Vehicle ID: 1939
+Status: APPROVED
+Final Quote: €1825.0
